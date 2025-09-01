@@ -131,6 +131,7 @@
 # ================================
 # SUMMARY
 # ================================
+
 # - Data Analyst → Works with existing data, creates reports, dashboards.
 # - Data Engineer → Prepares & manages the infrastructure to store/move data.
 # - Data Scientist → Builds models and extracts insights from data.
