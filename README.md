@@ -13,7 +13,7 @@ This repo is dedicated to my learning journey in Machine Learning, covering conc
 
 ---
 
-# 📚 Machine Learning Course (CampusX)
+# 📚 Machine Learning Course (Mirza Yasir Abdullah Baig)
 
 This repository contains a structured learning path for mastering **Machine Learning** step by step.  
 It follows a well-defined sequence starting from the basics to advanced ML topics with intuition, math, and code implementations.
