@@ -83,3 +83,5 @@ print("Median Age:", df['Age'].median())
 print("Q1 (25%):", df['Age'].quantile(0.25))
 print("Q3 (75%):", df['Age'].quantile(0.75))
 print("IQR (Q3 - Q1):", df['Age'].quantile(0.75) - df['Age'].quantile(0.25))
+
+# Thats enoung for the Univarite Analysis
