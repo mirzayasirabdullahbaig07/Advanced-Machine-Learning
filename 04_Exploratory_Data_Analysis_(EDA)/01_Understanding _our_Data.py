@@ -1,4 +1,4 @@
-# understanding the data
+# Topic 1 Understanding YOUR DATA
 
 import pandas as pd
 
