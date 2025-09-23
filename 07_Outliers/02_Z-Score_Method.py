@@ -120,7 +120,6 @@ df['cgpa'] = np.where(
         df['cgpa']
     )
 )
-
 print("Shape after capping:", df.shape)
 print(df['cgpa'].describe())
 
