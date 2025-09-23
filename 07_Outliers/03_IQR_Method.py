@@ -161,6 +161,5 @@ plt.title("After Capping Distribution")
 plt.subplot(2,2,4)
 sns.boxplot(new_df_cap['placement_exam_marks'])
 plt.title("After Capping Boxplot")
-
 plt.show()
 
