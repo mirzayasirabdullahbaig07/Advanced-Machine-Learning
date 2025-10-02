@@ -1,6 +1,7 @@
 # Advanced Machine Learning 🚀
 
-Welcome to my **Advanced Machine Learning** repository!  
+Welcome to my **Advanced Machine Learning** repository!
+
 This repo is dedicated to my learning journey in Machine Learning, covering concepts from intermediate to advanced levels with hands-on implementations.  
 
 ---
