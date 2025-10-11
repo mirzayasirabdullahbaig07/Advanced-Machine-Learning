@@ -224,3 +224,127 @@ gd.fit(X_train, y_train)
 y_pred = gd.predict(X_test)
 
 print("R² Score (GD from scratch):", r2_score(y_test, y_pred))
+
+
+
+
+# ------------------------------------------------------------
+# 🌟 GRADIENT DESCENT — Optimization Algorithm in ML
+# ------------------------------------------------------------
+
+# Gradient Descent is an optimization algorithm used to minimize
+# the loss function by updating model parameters (weights)
+# in the opposite direction of the gradient (slope) of the loss.
+
+# ------------------------------------------------------------
+# 🔹 EFFECT OF LEARNING RATE
+# ------------------------------------------------------------
+# The learning rate (α) controls the step size for each update.
+# - Too high → may overshoot the minimum (unstable training)
+# - Too low → may take too long to converge (slow training)
+# - Optimal → converges smoothly to the minimum
+
+# Example:
+# w = w - α * (dL/dw)
+# where α = learning rate, dL/dw = derivative of loss w.r.t weight
+
+# ------------------------------------------------------------
+# 🔹 EFFECT OF LOSS FUNCTION
+# ------------------------------------------------------------
+# The loss function measures how well the model predicts outputs.
+# Gradient Descent works to minimize this loss.
+# - Different problems need different loss functions:
+#   - Regression → Mean Squared Error (MSE)
+#   - Classification → Cross-Entropy Loss
+# - A poor loss function choice can lead to bad convergence or
+#   incorrect optimization direction.
+
+# ------------------------------------------------------------
+# 🔹 EFFECT OF DATA
+# ------------------------------------------------------------
+# The quality and quantity of training data directly affect
+# the gradient descent process.
+# - Noisy data → unstable gradients, poor convergence
+# - Too small data → may overfit quickly
+# - Well-normalized & large dataset → stable and smooth convergence
+
+# ------------------------------------------------------------
+# 🔹 TYPES OF GRADIENT DESCENT
+# ------------------------------------------------------------
+# 1️⃣ Batch Gradient Descent
+# 2️⃣ Stochastic Gradient Descent (SGD)
+# 3️⃣ Mini-Batch Gradient Descent
+
+# ------------------------------------------------------------
+# 🧩 1. BATCH GRADIENT DESCENT
+# ------------------------------------------------------------
+# - Uses the entire training dataset to compute the gradient.
+# - Provides a stable and accurate gradient estimate.
+# - Very slow for large datasets (requires high memory).
+# - Use when dataset is small and fits into memory.
+
+# Pseudocode:
+# for epoch in range(num_epochs):
+#     gradients = compute_gradients(X_train, y_train)
+#     weights = weights - α * gradients
+
+# ✅ Benefits:
+# - Stable convergence
+# - Accurate gradient estimation
+# ❌ Disadvantages:
+# - Computationally expensive
+# - Slow for large datasets
+# ⚙️ Use Case:
+# - Suitable for small datasets or offline batch training.
+
+# ------------------------------------------------------------
+# ⚡ 2. STOCHASTIC GRADIENT DESCENT (SGD)
+# ------------------------------------------------------------
+# - Updates weights after each training sample.
+# - Faster updates, introduces noise → helps escape local minima.
+# - Less stable than batch gradient descent.
+
+# Pseudocode:
+# for epoch in range(num_epochs):
+#     for i in range(len(X_train)):
+#         gradient = compute_gradient(X_train[i], y_train[i])
+#         weights = weights - α * gradient
+
+# ✅ Benefits:
+# - Faster updates
+# - Can handle large datasets
+# - May escape local minima
+# ❌ Disadvantages:
+# - High variance in updates (noisy path)
+# - May never converge exactly
+# ⚙️ Use Case:
+# - Large datasets, online learning scenarios.
+
+# ------------------------------------------------------------
+# 🔸 3. MINI-BATCH GRADIENT DESCENT
+# ------------------------------------------------------------
+# - Combines advantages of both Batch and SGD.
+# - Uses small batches of data to compute gradients.
+# - Balances speed and stability.
+
+# Pseudocode:
+# for epoch in range(num_epochs):
+#     for batch in mini_batches(X_train, y_train, batch_size):
+#         gradients = compute_gradients(batch)
+#         weights = weights - α * gradients
+
+# ✅ Benefits:
+# - Faster convergence than batch
+# - Less noisy than SGD
+# - Efficient on GPUs
+# ❌ Disadvantages:
+# - Requires tuning batch size
+# ⚙️ Use Case:
+# - Most commonly used in deep learning training.
+
+# ------------------------------------------------------------
+# 🧠 Summary:
+# ------------------------------------------------------------
+# - Batch Gradient Descent → Stable but slow (small datasets)
+# - Stochastic Gradient Descent → Fast but noisy (large datasets)
+# - Mini-Batch Gradient Descent → Best balance (standard in DL)
