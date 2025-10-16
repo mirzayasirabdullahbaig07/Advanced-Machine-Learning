@@ -443,4 +443,214 @@ reg.fit(X, y)
 # - Ideal when features are correlated (multicollinearity).
 # - Formula adds λI to make (X^T X) invertible and more stable.
 
+
+# ==================================================================================
+# RIDGE REGRESSION USING GRADIENT DESCENT
+#=================================================================================
+# What is Ridge Regression?
+
+# Ridge Regression is a type of **Linear Regression** that includes **L2 Regularization**.
+# It adds a penalty (α * sum of squared coefficients) to the loss function to prevent overfitting.
+#
+# It helps control large coefficients by shrinking them toward zero, 
+#    making the model more stable and less sensitive to noise.
+#
+# ----------------------------------------------------------------------------------
+#When to Use Ridge Regression?
+
+# • When your data shows **multicollinearity** (features are highly correlated).
+# • When your model overfits on the training data.
+# • When you want a **simpler, smoother** model that generalizes better.
+# ----------------------------------------------------------------------------------------------------
+#
+# Mathematical Formula
+# ----------------------------------------------------------------------------------------------------
+# Ordinary Linear Regression tries to minimize:
+#       J(θ) = (1/2m) * Σ (yᵢ - Xᵢθ)²
+#
+# Ridge Regression adds a regularization term:
+#       J(θ) = (1/2m) * [Σ (yᵢ - Xᵢθ)² + α * Σ θⱼ²]
+#
+# Where:
+#   • m = number of samples
+#   • α = regularization parameter (controls strength of penalty)
+#   • θ = coefficients (weights)
+#
+# The gradient for Ridge Regression:
+#       ∇J(θ) = (1/m) * [ Xᵀ(Xθ - y) + αθ ]
+#
+# Gradient Descent update rule:
+#       θ_new = θ_old - η * ∇J(θ)
+#
+# Where:
+#   • η = learning rate (step size)
+#
+# ----------------------------------------------------------------------------------------------------
+# Benefits
+# ----------------------------------------------------------------------------------------------------
+# • Reduces model complexity.
+# • Prevents overfitting.
+# • Works well with multicollinear data.
+# • Produces stable coefficient estimates.
+#
+# ----------------------------------------------------------------------------------------------------
+# Disadvantages
+# ----------------------------------------------------------------------------------------------------
+# • It does not perform feature selection (unlike Lasso).
+# • α (regularization strength) must be tuned carefully.
+# • Can underfit if α is too large.
+# ----------------------------------------------------------------------------------------------------
+#
+# Real-World Examples
+# ----------------------------------------------------------------------------------------------------
+# • Predicting house prices with correlated features (area, rooms, location, etc.)
+# • Medical data analysis (e.g., diabetes prediction)
+# • Economic forecasting
+# ----------------------------------------------------------------------------------------------------
+#
+#Let’s implement it step-by-step and compare:
+#   Ridge Regression via SGDRegressor
+#   Ridge Regression via sklearn.Ridge
+#   Custom Ridge Regression using Gradient Descent (MeraRidgeGD)
+# ----------------------------------------------------------------------------------------------------
+
+
+# ==================================================================================
+#  Using SGDRegressor with L2 Regularization
+# ==================================================================================
+
+from sklearn.datasets import load_diabetes
+from sklearn.metrics import r2_score
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import SGDRegressor, Ridge
+
+# Load the diabetes dataset
+X, y = load_diabetes(return_X_y=True)
+
+# Split dataset into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=4)
+
+# Define a Ridge-type model using SGDRegressor
+reg = SGDRegressor(
+    penalty='l2',          # L2 regularization = Ridge
+    max_iter=500,          # number of epochs
+    eta0=0.1,              # learning rate
+    learning_rate='constant',
+    alpha=0.001            # regularization strength
+)
+
+# Train the model
+reg.fit(X_train, y_train)
+
+# Predict test data
+y_pred = reg.predict(X_test)
+
+# Evaluate the model
+print("R2 score:", r2_score(y_test, y_pred))
+print("Coefficients:", reg.coef_)
+print("Intercept:", reg.intercept_)
+
+# Example Output:
+# R2 score 0.4408
+
+
+# ==================================================================================
+# Using Ridge Regression from sklearn
+# ==================================================================================
+
+reg = Ridge(alpha=0.001, max_iter=500, solver='sparse_cg')
+reg.fit(X_train, y_train)
+
+y_pred = reg.predict(X_test)
+print("R2 score:", r2_score(y_test, y_pred))
+print("Coefficients:", reg.coef_)
+print("Intercept:", reg.intercept_)
+
+# Example Output:
+# R2 score 0.4623
+
+# ====================================================================================================
+# Custom Implementation: MeraRidgeGD (Ridge Regression using Gradient Descent)
+# ====================================================================================================
+
+class MeraRidgeGD:
+    """
+    Custom Ridge Regression Implementation using Gradient Descent
+    -------------------------------------------------------------
+    This model minimizes the cost function:
+        J(θ) = (1/2m) * [ (y - Xθ)² + α * ||θ||² ]
+    
+    Using the update rule:
+        θ = θ - η * [ (XᵀXθ - Xᵀy) + αθ ]
+    """
+
+    def __init__(self, epochs, learning_rate, alpha):
+        self.learning_rate = learning_rate  # η
+        self.epochs = epochs                # number of iterations
+        self.alpha = alpha                  # regularization parameter
+        self.coef_ = None                   # model weights
+        self.intercept_ = None              # bias term
+
+    def fit(self, X_train, y_train):
+        # Initialize weights (θ) and intercept (bias)
+        self.coef_ = np.ones(X_train.shape[1])
+        self.intercept_ = 0
+
+        # Combine intercept and weights into one vector
+        theta = np.insert(self.coef_, 0, self.intercept_)
+
+        # Add bias column (1s) to training data
+        X_train = np.insert(X_train, 0, 1, axis=1)
+
+        # Gradient Descent loop
+        for i in range(self.epochs):
+            # Compute the gradient: ∇J(θ)
+            theta_der = np.dot(X_train.T, X_train).dot(theta) - np.dot(X_train.T, y_train) + self.alpha * theta
+
+            # Update parameters
+            theta = theta - self.learning_rate * theta_der
+
+        # Extract final weights and bias
+        self.coef_ = theta[1:]
+        self.intercept_ = theta[0]
+
+    def predict(self, X_test):
+        # Prediction formula: y_pred = Xw + b
+        return np.dot(X_test, self.coef_) + self.intercept_
+
+
+# Train custom Ridge Regression
+reg = MeraRidgeGD(epochs=500, alpha=0.001, learning_rate=0.005)
+reg.fit(X_train, y_train)
+
+# Predict test set
+y_pred = reg.predict(X_test)
+
+# Evaluate performance
+print("R2 score:", r2_score(y_test, y_pred))
+print("Coefficients:", reg.coef_)
+print("Intercept:", reg.intercept_)
+
+# Example Output:
+# R2 score 0.4737
+
+
+# ====================================================================================================
+# Summary and Comparison
+# ----------------------------------------------------------------------------------------------------
+# • SGDRegressor (L2):         R² ≈ 0.44
+# • Ridge (sklearn):            R² ≈ 0.46
+# • Custom MeraRidgeGD:         R² ≈ 0.47
+#
+# Our custom Gradient Descent Ridge performed slightly better due to optimized weight updates.
+# Regularization (α) helped control large weights and improved generalization.
+# ----------------------------------------------------------------------------------------------------
+# Key Takeaways
+# ----------------------------------------------------------------------------------------------------
+# • Ridge Regression = Linear Regression + L2 Penalty
+# • Use when you have multicollinearity or overfitting
+# • Gradient Descent can efficiently learn weights when dataset is large
+# • α (regularization parameter) must be tuned carefully
+
  
