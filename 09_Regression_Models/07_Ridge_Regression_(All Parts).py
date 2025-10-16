@@ -443,28 +443,23 @@ reg.fit(X, y)
 # - Ideal when features are correlated (multicollinearity).
 # - Formula adds λI to make (X^T X) invertible and more stable.
 
-
-# ==================================================================================
 # RIDGE REGRESSION USING GRADIENT DESCENT
-#=================================================================================
+
 # What is Ridge Regression?
 
 # Ridge Regression is a type of **Linear Regression** that includes **L2 Regularization**.
 # It adds a penalty (α * sum of squared coefficients) to the loss function to prevent overfitting.
-#
-# It helps control large coefficients by shrinking them toward zero, 
-#    making the model more stable and less sensitive to noise.
-#
-# ----------------------------------------------------------------------------------
+
+# It helps control large coefficients by shrinking them toward zero, making the model more stable and less sensitive to noise.
+
 #When to Use Ridge Regression?
 
 # • When your data shows **multicollinearity** (features are highly correlated).
 # • When your model overfits on the training data.
 # • When you want a **simpler, smoother** model that generalizes better.
-# ----------------------------------------------------------------------------------------------------
-#
+
 # Mathematical Formula
-# ----------------------------------------------------------------------------------------------------
+
 # Ordinary Linear Regression tries to minimize:
 #       J(θ) = (1/2m) * Σ (yᵢ - Xᵢθ)²
 #
@@ -484,40 +479,32 @@ reg.fit(X, y)
 #
 # Where:
 #   • η = learning rate (step size)
-#
-# ----------------------------------------------------------------------------------------------------
+
 # Benefits
-# ----------------------------------------------------------------------------------------------------
+
 # • Reduces model complexity.
 # • Prevents overfitting.
 # • Works well with multicollinear data.
 # • Produces stable coefficient estimates.
-#
-# ----------------------------------------------------------------------------------------------------
+
 # Disadvantages
-# ----------------------------------------------------------------------------------------------------
+
 # • It does not perform feature selection (unlike Lasso).
 # • α (regularization strength) must be tuned carefully.
 # • Can underfit if α is too large.
-# ----------------------------------------------------------------------------------------------------
-#
+
 # Real-World Examples
-# ----------------------------------------------------------------------------------------------------
+
 # • Predicting house prices with correlated features (area, rooms, location, etc.)
 # • Medical data analysis (e.g., diabetes prediction)
 # • Economic forecasting
-# ----------------------------------------------------------------------------------------------------
-#
+
 #Let’s implement it step-by-step and compare:
 #   Ridge Regression via SGDRegressor
 #   Ridge Regression via sklearn.Ridge
 #   Custom Ridge Regression using Gradient Descent (MeraRidgeGD)
-# ----------------------------------------------------------------------------------------------------
 
-
-# ==================================================================================
 #  Using SGDRegressor with L2 Regularization
-# ==================================================================================
 
 from sklearn.datasets import load_diabetes
 from sklearn.metrics import r2_score
@@ -554,10 +541,7 @@ print("Intercept:", reg.intercept_)
 # Example Output:
 # R2 score 0.4408
 
-
-# ==================================================================================
 # Using Ridge Regression from sklearn
-# ==================================================================================
 
 reg = Ridge(alpha=0.001, max_iter=500, solver='sparse_cg')
 reg.fit(X_train, y_train)
@@ -570,9 +554,7 @@ print("Intercept:", reg.intercept_)
 # Example Output:
 # R2 score 0.4623
 
-# ====================================================================================================
 # Custom Implementation: MeraRidgeGD (Ridge Regression using Gradient Descent)
-# ====================================================================================================
 
 class MeraRidgeGD:
     """
@@ -619,7 +601,6 @@ class MeraRidgeGD:
         # Prediction formula: y_pred = Xw + b
         return np.dot(X_test, self.coef_) + self.intercept_
 
-
 # Train custom Ridge Regression
 reg = MeraRidgeGD(epochs=500, alpha=0.001, learning_rate=0.005)
 reg.fit(X_train, y_train)
@@ -635,22 +616,233 @@ print("Intercept:", reg.intercept_)
 # Example Output:
 # R2 score 0.4737
 
-
-# ====================================================================================================
 # Summary and Comparison
-# ----------------------------------------------------------------------------------------------------
+
 # • SGDRegressor (L2):         R² ≈ 0.44
 # • Ridge (sklearn):            R² ≈ 0.46
 # • Custom MeraRidgeGD:         R² ≈ 0.47
 #
 # Our custom Gradient Descent Ridge performed slightly better due to optimized weight updates.
 # Regularization (α) helped control large weights and improved generalization.
-# ----------------------------------------------------------------------------------------------------
+
 # Key Takeaways
-# ----------------------------------------------------------------------------------------------------
+
 # • Ridge Regression = Linear Regression + L2 Penalty
 # • Use when you have multicollinearity or overfitting
 # • Gradient Descent can efficiently learn weights when dataset is large
 # • α (regularization parameter) must be tuned carefully
 
- 
+
+# RIDGE REGRESSION — DEEP EXPLANATION (with Visualization)
+
+# 5 Key Concepts of Ridge Regression
+
+# 1 How coefficients are affected?
+# 2 Which coefficients shrink more?
+# 3 Bias-Variance tradeoff
+# 4 Effect on the Loss Function
+# 5 Why it’s called Ridge Estimate (vs OLS Estimate)
+
+# 1 HOW COEFFICIENTS ARE AFFECTED
+
+# Ridge regression adds a penalty term α * Σ(wᵢ²) to the cost function.
+# As α increases → the penalty grows → coefficients shrink toward zero.
+# However, unlike Lasso, they never become exactly zero.
+#
+#  Cost Function:
+#     J(w) = Σ(yᵢ - (Xw + b))² + αΣ(wᵢ²)
+#
+#  Effect:
+#     • Small α → behaves like Linear Regression (no penalty)
+#     • Large α → coefficients shrink closer to zero → model becomes smoother
+
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Ridge
+from sklearn.metrics import r2_score
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+data = load_diabetes()
+X_train, X_test, y_train, y_test = train_test_split(
+    data.data, data.target, test_size=0.2, random_state=2
+)
+
+coefs = []
+r2_scores = []
+
+for alpha in [0, 10, 100, 1000]:
+    reg = Ridge(alpha=alpha)
+    reg.fit(X_train, y_train)
+    coefs.append(reg.coef_.tolist())
+    y_pred = reg.predict(X_test)
+    r2_scores.append(r2_score(y_test, y_pred))
+
+plt.figure(figsize=(14, 9))
+plt.subplot(221)
+plt.bar(data.feature_names, coefs[0])
+plt.title(f'Alpha = 0 , R2 = {round(r2_scores[0], 2)}')
+
+plt.subplot(222)
+plt.bar(data.feature_names, coefs[1])
+plt.title(f'Alpha = 10 , R2 = {round(r2_scores[1], 2)}')
+
+plt.subplot(223)
+plt.bar(data.feature_names, coefs[2])
+plt.title(f'Alpha = 100 , R2 = {round(r2_scores[2], 2)}')
+
+plt.subplot(224)
+plt.bar(data.feature_names, coefs[3])
+plt.title(f'Alpha = 1000 , R2 = {round(r2_scores[3], 2)}')
+
+plt.suptitle(" Effect of Regularization on Ridge Coefficients", fontsize=15)
+plt.show()
+
+#  As α increases, all coefficients shrink toward zero (less magnitude).
+#  The model becomes smoother and less likely to overfit.
+
+# 2 HIGHER COEFFICIENTS ARE IMPACTED MORE
+
+# Ridge penalizes large weights more heavily due to the squared term (w²).
+# As α increases, features with larger coefficients get reduced more.
+# This helps handle multicollinearity (when features are correlated).
+
+alphas = [0, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]
+coefs = []
+
+for alpha in alphas:
+    reg = Ridge(alpha=alpha)
+    reg.fit(X_train, y_train)
+    coefs.append(reg.coef_.tolist())
+
+coef_df = pd.DataFrame(coefs, columns=data.feature_names, index=alphas)
+print(coef_df)
+
+# Visualization: how each coefficient changes as α increases
+input_array = np.array(coefs).T
+plt.figure(figsize=(15, 8))
+plt.plot(alphas, np.zeros(len(alphas)), color='black', linewidth=3)
+for i in range(input_array.shape[0]):
+    plt.plot(alphas, input_array[i], label=data.feature_names[i])
+plt.xscale('log')
+plt.xlabel('Alpha (Regularization Strength)')
+plt.ylabel('Coefficient Value')
+plt.title('Coefficient Shrinkage Path (Ridge Regularization)')
+plt.legend()
+plt.show()
+
+#  Larger coefficients shrink faster.
+#  Small coefficients remain relatively stable.
+#  This ensures balance and stability in the model.
+
+# 3 IMPACT ON BIAS AND VARIANCE
+
+# Ridge increases Bias slightly but reduces Variance significantly.
+
+# • Low α → low bias, high variance (model fits training data tightly)
+# • High α → high bias, low variance (model becomes smoother, more stable)
+#
+# This tradeoff improves model generalization.
+
+from sklearn.preprocessing import PolynomialFeatures
+from mlxtend.evaluate import bias_variance_decomp
+
+# Generate nonlinear data
+m = 100
+X = 5 * np.random.rand(m, 1) - 2
+y = 0.7 * X ** 2 - 2 * X + 3 + np.random.randn(m, 1)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y.ravel(), test_size=0.2, random_state=2
+)
+
+poly = PolynomialFeatures(degree=15)
+X_train = poly.fit_transform(X_train)
+X_test = poly.transform(X_test)
+
+alphas = np.linspace(0, 30, 100)
+loss, bias, variance = [], [], []
+
+for alpha in alphas:
+    reg = Ridge(alpha=alpha)
+    avg_loss, avg_bias, avg_var = bias_variance_decomp(
+        reg, X_train, y_train, X_test, y_test, loss='mse', random_seed=123
+    )
+    loss.append(avg_loss)
+    bias.append(avg_bias)
+    variance.append(avg_var)
+
+plt.plot(alphas, loss, label='Loss')
+plt.plot(alphas, bias, label='Bias²')
+plt.plot(alphas, variance, label='Variance')
+plt.xlabel('Alpha (Regularization Strength)')
+plt.ylim(0, 5)
+plt.legend()
+plt.title('Bias-Variance Tradeoff in Ridge Regression')
+plt.show()
+
+# As α increases:
+#    • Bias increases (model becomes simpler)
+#    • Variance decreases (model becomes stable)
+#    • Total loss decreases until optimal α, then rises again.
+
+
+# 4 EFFECT OF REGULARIZATION ON LOSS FUNCTION
+
+# Ridge modifies the standard loss function by adding an αw² term.
+
+# Loss = Σ(y - (wx + b))² + αw²
+
+# Increasing α makes the cost curve steeper → discourages large weights.
+
+from sklearn.datasets import make_regression
+from sklearn.linear_model import LinearRegression
+
+X, y = make_regression(n_samples=100, n_features=1, noise=20, random_state=13)
+plt.scatter(X, y)
+plt.title("Generated Data for Loss Function Visualization")
+plt.show()
+
+reg = LinearRegression()
+reg.fit(X, y)
+print("Coefficient:", reg.coef_[0])
+print("Intercept:", reg.intercept_)
+
+def cal_loss(w, alpha):
+    return np.sum((y - (w * X.ravel() + reg.intercept_)) ** 2) + alpha * (w ** 2)
+
+w_values = np.linspace(-50, 100, 100)
+plt.figure(figsize=(5, 6))
+
+for alpha in [0, 10, 20, 30, 40, 50, 100]:
+    loss = [cal_loss(w, alpha) for w in w_values]
+    plt.plot(w_values, loss, label=f'alpha = {alpha}')
+
+plt.legend()
+plt.xlabel('Weight (w)')
+plt.ylabel('Loss')
+plt.title('Effect of α on Loss Function Shape')
+plt.show()
+
+# As α increases, the loss curve becomes more convex and steeper.
+# This prevents weights from growing too large (overfitting control).
+
+# 5 WHY CALLED "RIDGE ESTIMATE" vs "OLS ESTIMATE"
+
+# • OLS (Ordinary Least Squares) minimizes the sum of squared errors:
+#       J(w) = Σ(yᵢ - Xw)²
+
+# • Ridge modifies this by adding αΣ(w²):
+#       J(w) = Σ(yᵢ - Xw)² + αΣ(w²)
+
+# Hence, Ridge “adds a ridge” (penalty ridge) to the cost function surface.
+# This ridge prevents parameters from exploding and keeps them within a stable range.
+
+# Summary:
+# • Coefficients shrink but never become zero.
+# • Large weights are penalized more.
+# • Bias ↑ and Variance ↓ → better generalization.
+# • Loss function becomes smoother and convex.
+# • Called Ridge because penalty forms a ridge in the optimization landscape.
+
