@@ -1,5 +1,6 @@
 # Logistic Regression (Complete Intuition + Math + Code Roadmap)
-
+# https://atifalikhokhar.my.canva.site/
+# https://www.linkedin.com/in/atifalikhokhar/
 # Logistic Regression is a supervised learning algorithm used for binary classification problems (0 or 1 output).
 # It predicts the probability that a given input belongs to a particular class using the **Sigmoid Function**.
 
@@ -172,5 +173,106 @@ plt.scatter(X[:,0],X[:,1],c=y,cmap='winter',s=100)
 plt.ylim(-3,2)
 (-3.0, 2.0)
 
- 
- 
+# --------------------------------------------------------------
+# Logistic Regression — Loss Function, MLE, and Cross-Entropy
+# --------------------------------------------------------------
+
+# Logistic Regression is used for binary classification problems.
+# It predicts probabilities between 0 and 1 using the sigmoid function.
+
+# --------------------------------------------------------------
+# Step 1: The Model
+# --------------------------------------------------------------
+# Suppose we have input features X and target labels y (0 or 1).
+# The model predicts probability that y = 1 as:
+#     P(y=1 | x) = σ(z)
+# where z = w·x + b
+# and σ(z) = 1 / (1 + e^(-z))   ← sigmoid function
+
+# --------------------------------------------------------------
+# Step 2: Likelihood Function (Maximum Likelihood Estimation)
+# --------------------------------------------------------------
+# We want to find parameters (w, b) that make the observed data most likely.
+# For each training example (x_i, y_i):
+#     P(y_i | x_i) = (σ(z_i))^y_i * (1 - σ(z_i))^(1 - y_i)
+# Why this formula?
+# - If y_i = 1, it keeps σ(z_i)
+# - If y_i = 0, it keeps (1 - σ(z_i))
+
+# For all samples, the likelihood L is the product of all probabilities:
+#     L = Π [ (σ(z_i))^y_i * (1 - σ(z_i))^(1 - y_i) ]
+
+# --------------------------------------------------------------
+# Step 3: Log-Likelihood (for easier math)
+# --------------------------------------------------------------
+# Taking log of likelihood (because log turns products into sums):
+#     log(L) = Σ [ y_i * log(σ(z_i)) + (1 - y_i) * log(1 - σ(z_i)) ]
+
+# We want to maximize log(L).
+# However, optimization libraries usually *minimize* loss functions,
+# so we take the negative of the log-likelihood.
+
+# --------------------------------------------------------------
+# Step 4: Binary Cross-Entropy Loss (Negative Log-Likelihood)
+# --------------------------------------------------------------
+# Loss = - (1/N) * Σ [ y_i * log(σ(z_i)) + (1 - y_i) * log(1 - σ(z_i)) ]
+# This is known as:
+#      Binary Cross-Entropy Loss
+# or
+#      Log Loss
+# It penalizes wrong confident predictions heavily.
+
+# --------------------------------------------------------------
+# Step 5: Why do we use it?
+# --------------------------------------------------------------
+# Because maximizing the likelihood of data is equivalent to
+# minimizing the cross-entropy loss.
+# It helps our logistic regression model learn parameters (w, b)
+# that make predicted probabilities as close as possible to true labels.
+
+# --------------------------------------------------------------
+# Step 6: Example in Python (with math)
+# --------------------------------------------------------------
+import numpy as np
+
+# Sample data
+X = np.array([[1], [2], [3], [4]])  # feature
+y = np.array([0, 0, 1, 1])          # target labels
+
+# Initialize weights
+w = np.random.randn()
+b = 0
+
+# Sigmoid function
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+# Predictions
+z = w * X + b
+y_pred = sigmoid(z)
+
+# Binary Cross-Entropy Loss
+loss = -np.mean(y * np.log(y_pred + 1e-9) + (1 - y) * np.log(1 - y_pred + 1e-9))
+
+print("Predicted Probabilities:", y_pred)
+print("Binary Cross Entropy Loss:", loss)
+
+# --------------------------------------------------------------
+# Step 7: Gradient Descent Intuition
+# --------------------------------------------------------------
+# To minimize the loss, we compute gradients:
+#     ∂L/∂w = (1/N) * Σ (σ(z_i) - y_i) * x_i
+#     ∂L/∂b = (1/N) * Σ (σ(z_i) - y_i)
+# Then update:
+#     w = w - α * ∂L/∂w
+#     b = b - α * ∂L/∂b
+# where α is the learning rate.
+
+# --------------------------------------------------------------
+# Step 8: Summary
+# --------------------------------------------------------------
+# 🔹 MLE → find parameters that maximize likelihood of data.
+# 🔹 Taking log → log-likelihood → easier to differentiate.
+# 🔹 Negating → gives us binary cross-entropy loss.
+# 🔹 Minimizing BCE = Maximizing data likelihood = Better model.
+# --------------------------------------------------------------
