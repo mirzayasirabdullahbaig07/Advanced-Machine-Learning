@@ -80,98 +80,147 @@
 #     w_new = w_old + η * (y - ŷ) * xᵢ
 # ---------------------------------------------------------------
 
-# Logistic Regression Part 2 | Perceptron Trick Code
+# ==========================================================
+# Logistic Regression Part 2 | Perceptron Trick Visualization
+# ==========================================================
 
+# Import Required Libraries
 from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
 import numpy as np
-X, y = make_classification(n_samples=100, n_features=2, n_informative=1,n_redundant=0,
-                           n_classes=2, n_clusters_per_class=1, random_state=41,hypercube=False,class_sep=10)
 import matplotlib.pyplot as plt
-plt.figure(figsize=(10,6))
-plt.scatter(X[:,0],X[:,1],c=y,cmap='winter',s=100)
-<matplotlib.collections.PathCollection at 0x1def70216d0>
-
-def perceptron(X,y):
-    
-    X = np.insert(X,0,1,axis=1)
-    weights = np.ones(X.shape[1])
-    lr = 0.1
-    
-    for i in range(1000):
-        j = np.random.randint(0,100)
-        y_hat = step(np.dot(X[j],weights))
-        weights = weights + lr*(y[j]-y_hat)*X[j]
-        
-    return weights[0],weights[1:]
-        
-def step(z):
-    return 1 if z>0 else 0
-intercept_,coef_ = perceptron(X,y)
-print(coef_)
-print(intercept_)
-[1.44152475 0.10464821]
-0.9
-m = -(coef_[0]/coef_[1])
-b = -(intercept_/coef_[1])
-x_input = np.linspace(-3,3,100)
-y_input = m*x_input + b
-plt.figure(figsize=(10,6))
-plt.plot(x_input,y_input,color='red',linewidth=3)
-plt.scatter(X[:,0],X[:,1],c=y,cmap='winter',s=100)
-plt.ylim(-3,2)
-(-3.0, 2.0)
-
-def perceptron(X,y):
-    
-    m = []
-    b = []
-    
-    X = np.insert(X,0,1,axis=1)
-    weights = np.ones(X.shape[1])
-    lr = 0.1
-    
-    for i in range(200):
-        j = np.random.randint(0,100)
-        y_hat = step(np.dot(X[j],weights))
-        weights = weights + lr*(y[j]-y_hat)*X[j]
-        
-        m.append(-(weights[1]/weights[2]))
-        b.append(-(weights[0]/weights[2]))
-        
-    return m,b
-m,b = perceptron(X,y)
-%matplotlib notebook
 from matplotlib.animation import FuncAnimation
-import matplotlib.animation as animation
-fig, ax = plt.subplots(figsize=(9,5))
 
+# ----------------------------------------------------------
+# STEP 1: Generate a Binary Classification Dataset
+# ----------------------------------------------------------
+X, y = make_classification(
+    n_samples=100,
+    n_features=2,
+    n_informative=1,
+    n_redundant=0,
+    n_classes=2,
+    n_clusters_per_class=1,
+    random_state=41,
+    hypercube=False,
+    class_sep=10
+)
+
+# Visualize Dataset
+plt.figure(figsize=(10, 6))
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='winter', s=100)
+plt.title("Generated Binary Classification Data", fontsize=14)
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.show()
+
+
+# ----------------------------------------------------------
+# STEP 2: Define Perceptron Model
+# ----------------------------------------------------------
+def step(z):
+    """Step activation function."""
+    return 1 if z > 0 else 0
+
+
+def perceptron(X, y):
+    """Implements the perceptron learning algorithm."""
+    X = np.insert(X, 0, 1, axis=1)   # Add bias term
+    weights = np.ones(X.shape[1])    # Initialize weights
+    lr = 0.1                         # Learning rate
+
+    # Training for 1000 iterations
+    for _ in range(1000):
+        j = np.random.randint(0, len(y))
+        y_hat = step(np.dot(X[j], weights))
+        weights = weights + lr * (y[j] - y_hat) * X[j]
+
+    return weights[0], weights[1:]
+
+
+# Train Perceptron
+intercept_, coef_ = perceptron(X, y)
+print("Weights:", coef_)
+print("Intercept:", intercept_)
+
+# Decision Boundary
+m = -(coef_[0] / coef_[1])
+b = -(intercept_ / coef_[1])
+
+x_input = np.linspace(-3, 3, 100)
+y_input = m * x_input + b
+
+# Plot the Perceptron Decision Boundary
+plt.figure(figsize=(10, 6))
+plt.plot(x_input, y_input, color='red', linewidth=3, label="Perceptron Boundary")
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='winter', s=100)
+plt.ylim(-3, 2)
+plt.legend()
+plt.title("Perceptron Decision Boundary")
+plt.show()
+
+
+# ----------------------------------------------------------
+# STEP 3: Visualize Learning (Perceptron Trick)
+# ----------------------------------------------------------
+def perceptron_animation(X, y):
+    """Track slope (m) and intercept (b) during training for visualization."""
+    m_vals, b_vals = [], []
+    X = np.insert(X, 0, 1, axis=1)
+    weights = np.ones(X.shape[1])
+    lr = 0.1
+
+    for _ in range(200):
+        j = np.random.randint(0, len(y))
+        y_hat = step(np.dot(X[j], weights))
+        weights = weights + lr * (y[j] - y_hat) * X[j]
+        m_vals.append(-(weights[1] / weights[2]))
+        b_vals.append(-(weights[0] / weights[2]))
+
+    return m_vals, b_vals
+
+
+m_vals, b_vals = perceptron_animation(X, y)
+
+# Create Animation
+fig, ax = plt.subplots(figsize=(9, 5))
 x_i = np.arange(-3, 3, 0.1)
-y_i = x_i*m[0] +b[0]
-ax.scatter(X[:,0],X[:,1],c=y,cmap='winter',s=100)
-line, = ax.plot(x_i, x_i*m[0] +b[0] , 'r-', linewidth=2)
-plt.ylim(-3,3)
+line, = ax.plot(x_i, x_i * m_vals[0] + b_vals[0], 'r-', linewidth=2)
+ax.scatter(X[:, 0], X[:, 1], c=y, cmap='winter', s=100)
+plt.ylim(-3, 3)
+
 def update(i):
-    label = 'epoch {0}'.format(i + 1)
-    line.set_ydata(x_i*m[i] + b[i])
+    """Update line for each epoch."""
+    label = f'Epoch {i + 1}'
+    line.set_ydata(x_i * m_vals[i] + b_vals[i])
     ax.set_xlabel(label)
-    # return line, ax
+    return line, ax
 
 anim = FuncAnimation(fig, update, repeat=True, frames=200, interval=100)
+plt.show()
 
-from sklearn.linear_model import LogisticRegression
+
+# ----------------------------------------------------------
+# STEP 4: Compare with Logistic Regression
+# ----------------------------------------------------------
 lor = LogisticRegression()
-lor.fit(X,y)
-LogisticRegression()
-m = -(lor.coef_[0][0]/lor.coef_[0][1])
-b = -(lor.intercept_/lor.coef_[0][1])
-x_input1 = np.linspace(-3,3,100)
-y_input1 = m*x_input + b
-plt.figure(figsize=(10,6))
-plt.plot(x_input,y_input,color='red',linewidth=3)
-plt.plot(x_input1,y_input1,color='black',linewidth=3)
-plt.scatter(X[:,0],X[:,1],c=y,cmap='winter',s=100)
-plt.ylim(-3,2)
-(-3.0, 2.0)
+lor.fit(X, y)
+
+# Logistic Regression Line
+m_lr = -(lor.coef_[0][0] / lor.coef_[0][1])
+b_lr = -(lor.intercept_ / lor.coef_[0][1])
+x_input1 = np.linspace(-3, 3, 100)
+y_input1 = m_lr * x_input1 + b_lr
+
+# Plot Both Decision Boundaries
+plt.figure(figsize=(10, 6))
+plt.plot(x_input, y_input, color='red', linewidth=3, label="Perceptron")
+plt.plot(x_input1, y_input1, color='black', linewidth=3, label="Logistic Regression")
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='winter', s=100)
+plt.ylim(-3, 2)
+plt.legend()
+plt.title("Comparison: Perceptron vs Logistic Regression")
+plt.show()
 
 # --------------------------------------------------------------
 # Logistic Regression — Loss Function, MLE, and Cross-Entropy
@@ -271,8 +320,83 @@ print("Binary Cross Entropy Loss:", loss)
 # --------------------------------------------------------------
 # Step 8: Summary
 # --------------------------------------------------------------
-# 🔹 MLE → find parameters that maximize likelihood of data.
-# 🔹 Taking log → log-likelihood → easier to differentiate.
-# 🔹 Negating → gives us binary cross-entropy loss.
-# 🔹 Minimizing BCE = Maximizing data likelihood = Better model.
+# MLE → find parameters that maximize likelihood of data.
+# Taking log → log-likelihood → easier to differentiate.
+# Negating → gives us binary cross-entropy loss.
+# Minimizing BCE = Maximizing data likelihood = Better model.
 # --------------------------------------------------------------
+
+# ==============================================
+# Derivation of the Sigmoid Function Derivative
+# ==============================================
+
+# Let's start from the definition of the sigmoid function:
+# σ(x) = 1 / (1 + e^(-x))
+
+# -----------------------------------------------
+# Step 1: Write it in a form that's easier to differentiate
+# -----------------------------------------------
+# σ(x) = (1 + e^(-x))^(-1)
+
+# -----------------------------------------------
+# Step 2: Differentiate using the chain rule
+# -----------------------------------------------
+# dσ(x)/dx = -1 * (1 + e^(-x))^(-2) * d/dx(1 + e^(-x))
+
+# -----------------------------------------------
+# Step 3: Derivative of (1 + e^(-x)) with respect to x
+# -----------------------------------------------
+# d/dx(1 + e^(-x)) = -e^(-x)
+
+# -----------------------------------------------
+# Step 4: Substitute this back into the equation
+# -----------------------------------------------
+# dσ(x)/dx = -1 * (1 + e^(-x))^(-2) * (-e^(-x))
+# Simplify the negatives:
+# dσ(x)/dx = e^(-x) / (1 + e^(-x))^2
+
+# -----------------------------------------------
+# Step 5: Multiply and divide by (1 + e^(-x))
+# to express in terms of σ(x)
+# -----------------------------------------------
+# We know:
+# σ(x) = 1 / (1 + e^(-x))
+# Therefore:
+# 1 - σ(x) = e^(-x) / (1 + e^(-x))
+
+# Substitute these forms:
+# dσ(x)/dx = σ(x) * (1 - σ(x))
+
+# -----------------------------------------------
+# Final Simplified Derivative:
+# -----------------------------------------------
+# σ'(x) = σ(x) * (1 - σ(x))
+# This is the most compact and elegant form of the derivative.
+
+# -----------------------------------------------
+# Step 6: Verify with Python Implementation
+# -----------------------------------------------
+
+import numpy as np
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    s = sigmoid(x)
+    return s * (1 - s)
+
+# Test
+x = 0
+print("σ(x) =", sigmoid(x))           # Output: 0.5
+print("σ'(x) =", sigmoid_derivative(x))  # Output: 0.25
+
+# -----------------------------------------------
+# Step 7: Intuition Behind the Derivative
+# -----------------------------------------------
+# - The derivative is highest at x = 0 → σ'(0) = 0.25
+# - For very large +x or -x, σ'(x) ≈ 0
+#   → meaning the neuron "saturates" (gradient vanishes)
+# - That’s why sigmoid is less used in deep networks’ hidden layers
+#   but still used in output layers of binary classification.
+
