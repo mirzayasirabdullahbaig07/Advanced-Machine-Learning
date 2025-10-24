@@ -1,6 +1,5 @@
 # Logistic Regression (Complete Intuition + Math + Code Roadmap)
-# https://atifalikhokhar.my.canva.site/
-# https://www.linkedin.com/in/atifalikhokhar/
+
 # Logistic Regression is a supervised learning algorithm used for binary classification problems (0 or 1 output).
 # It predicts the probability that a given input belongs to a particular class using the **Sigmoid Function**.
 
@@ -113,7 +112,6 @@ plt.title("Generated Binary Classification Data", fontsize=14)
 plt.xlabel("Feature 1")
 plt.ylabel("Feature 2")
 plt.show()
-
 
 # ----------------------------------------------------------
 # STEP 2: Define Perceptron Model
@@ -400,3 +398,169 @@ print("σ'(x) =", sigmoid_derivative(x))  # Output: 0.25
 # - That’s why sigmoid is less used in deep networks’ hidden layers
 #   but still used in output layers of binary classification.
 
+# ==========================================================
+# Logistic Regression (All Parts: Sigmoid, Loss, Gradient Descent)
+# ==========================================================
+
+# ----------------------------------------------------------
+# WHEN TO USE LOGISTIC REGRESSION
+# ----------------------------------------------------------
+# Logistic Regression is used for binary or multi-class classification.
+# Example use-cases:
+# - Spam (1) or Not Spam (0)
+# - Disease (1) or No Disease (0)
+# - Pass (1) or Fail (0)
+#
+# It works well when:
+# - Relationship between features and target is approximately linear.
+# - The output needs to be a probability between 0 and 1.
+# ----------------------------------------------------------
+
+
+# ----------------------------------------------------------
+# HOW LOGISTIC REGRESSION WORKS
+# ----------------------------------------------------------
+# Step 1: Compute a linear combination (z):
+#          z = w1*x1 + w2*x2 + ... + b
+# Step 2: Apply the sigmoid activation:
+#          σ(z) = 1 / (1 + e^(-z))
+# Step 3: Predict class based on probability:
+#          y_pred = 1 if σ(z) > 0.5 else 0
+# ----------------------------------------------------------
+
+
+# ----------------------------------------------------------
+# FORMULA (Sigmoid + Loss + Gradient)
+# ----------------------------------------------------------
+# Sigmoid Function: σ(z) = 1 / (1 + e^(-z))
+# Loss Function (Log Loss):
+#   L = - (1/m) * Σ [ y*log(y_hat) + (1-y)*log(1-y_hat) ]
+# Gradient Descent Updates:
+#   w = w - α * (1/m) * Σ( (y_hat - y) * x )
+#   b = b - α * (1/m) * Σ( (y_hat - y) )
+# ----------------------------------------------------------
+
+
+# ----------------------------------------------------------
+# STEP 1: Import Libraries and Create Data
+# ----------------------------------------------------------
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate a simple binary classification dataset
+X, y = make_classification(
+    n_samples=100,
+    n_features=2,
+    n_informative=1,
+    n_redundant=0,
+    n_classes=2,
+    n_clusters_per_class=1,
+    random_state=41,
+    hypercube=False,
+    class_sep=20
+)
+
+# Visualize dataset
+plt.figure(figsize=(10, 6))
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='winter', s=100)
+plt.title("Generated Binary Classification Dataset", fontsize=14)
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.show()
+
+
+# ----------------------------------------------------------
+# STEP 2: Logistic Regression using sklearn (for reference)
+# ----------------------------------------------------------
+lor = LogisticRegression(penalty='none', solver='sag')
+lor.fit(X, y)
+
+print("Weights (coefficients):", lor.coef_)
+print("Intercept (bias):", lor.intercept_)
+
+# Equation of decision boundary:
+# w1*x1 + w2*x2 + b = 0  →  x2 = -(w1/w2)x1 - (b/w2)
+m1 = -(lor.coef_[0][0] / lor.coef_[0][1])
+b1 = -(lor.intercept_ / lor.coef_[0][1])
+
+x_input = np.linspace(-3, 3, 100)
+y_input = m1 * x_input + b1
+
+# Plot decision boundary from sklearn
+plt.figure(figsize=(10, 6))
+plt.plot(x_input, y_input, color='red', linewidth=3, label="sklearn Logistic Regression")
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='winter', s=100)
+plt.title("Decision Boundary using Logistic Regression (sklearn)")
+plt.legend()
+plt.ylim(-3, 2)
+plt.show()
+
+
+# ----------------------------------------------------------
+# STEP 3: Implement Logistic Regression from Scratch
+# ----------------------------------------------------------
+
+def sigmoid(z):
+    """Sigmoid activation function"""
+    return 1 / (1 + np.exp(-z))
+
+
+def gd(X, y):
+    """
+    Gradient Descent for Logistic Regression
+    - Adds bias column to X
+    - Initializes weights
+    - Iteratively updates weights using gradients
+    """
+    X = np.insert(X, 0, 1, axis=1)  # Add bias column
+    weights = np.ones(X.shape[1])   # Initialize weights
+    lr = 0.5                        # Learning rate
+
+    # Iterate over epochs
+    for i in range(5000):
+        # Forward propagation (prediction)
+        y_hat = sigmoid(np.dot(X, weights))
+        
+        # Weight update rule (Gradient Descent)
+        weights = weights + lr * (np.dot((y - y_hat), X) / X.shape[0])
+
+    # Return slope and intercept
+    return weights[1:], weights[0]
+
+
+# Train model using custom gradient descent
+coef_, intercept_ = gd(X, y)
+
+# Compute line parameters
+m2 = -(coef_[0] / coef_[1])
+b2 = -(intercept_ / coef_[1])
+
+x_input1 = np.linspace(-3, 3, 100)
+y_input1 = m2 * x_input1 + b2
+
+# ----------------------------------------------------------
+# STEP 4: Plot Comparison (Sklearn vs Scratch)
+# ----------------------------------------------------------
+plt.figure(figsize=(10, 6))
+plt.plot(x_input, y_input, color='red', linewidth=3, label="sklearn Logistic Regression")
+plt.plot(x_input1, y_input1, color='black', linewidth=3, label="From Scratch (Gradient Descent)")
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='winter', s=100)
+plt.title("Comparison: Logistic Regression (sklearn) vs From Scratch")
+plt.legend()
+plt.ylim(-3, 2)
+plt.show()
+
+
+# ----------------------------------------------------------
+# STEP 5: Understanding Input Transformation
+# ----------------------------------------------------------
+# When we add a bias column:
+# Original X shape = (100, 2)
+# After insertion -> (100, 3)
+# Each row: [1, x1, x2]
+# This allows the bias term to be included in the dot product.
+X1 = np.insert(X, 0, 1, axis=1)
+print("X after bias column insertion:\n", X1[:5])
+print("Initial weights (ones):", np.ones(X1.shape[1]))
